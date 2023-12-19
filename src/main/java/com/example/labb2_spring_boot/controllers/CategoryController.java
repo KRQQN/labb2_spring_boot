@@ -1,35 +1,51 @@
 package com.example.labb2_spring_boot.controllers;
 
-import com.example.labb2_spring_boot.entities.Category;
+import com.example.labb2_spring_boot.dataTransferObjects.CategoryDto;
+import com.example.labb2_spring_boot.dataTransferObjects.CategoryIdNameDto;
+import com.example.labb2_spring_boot.exeptions.EntityNotFoundException;
+import com.example.labb2_spring_boot.requestBodies.AddCategoryReqBody;
 import com.example.labb2_spring_boot.services.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("api/categories")
+@RequestMapping("api/")
 public class CategoryController {
 
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
-    @GetMapping
-    public List<Category> getAll() {
-        return categoryService.getAll();
+    @GetMapping("categories")
+    public ResponseEntity<List<CategoryIdNameDto>> getAll() {
+        if(categoryService.getAll().isEmpty()) throw new EntityNotFoundException("Category");
+        else return ResponseEntity.ok().body(categoryService.getAll());
+
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Category> getCategory(@PathVariable int id) {
-        return categoryService.getCategory(id).map(c -> ResponseEntity.ok().body(c))
-                .orElseGet(() -> ResponseEntity.notFound().build());
-
+    public ResponseEntity<CategoryDto> getOne(@PathVariable Long id) {
+        return categoryService.getById(id).map(c -> ResponseEntity.ok().body(c))
+                .orElseThrow(() -> new EntityNotFoundException("Category", id));
     }
+
+    @PostMapping
+    public ResponseEntity<CategoryDto> addOne(@Valid @RequestBody AddCategoryReqBody reqBody) {
+        CategoryDto createdCategory = categoryService.addOne(reqBody);
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdCategory.id())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(createdCategory);
+    }
+
 }
