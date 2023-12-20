@@ -11,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -47,16 +48,10 @@ public class Location {
     private Point<G2D> coordinate;
 
     @CreationTimestamp
-    @Column(updatable = false, nullable = false)
-    private final LocalDateTime created;
+    private Instant created;
 
     @UpdateTimestamp
-    private LocalDateTime modified;
-
-    public Location() {
-        this.created = LocalDateTime.now();
-    }
-
+    private LocalDateTime modified ;
 
     @Override
     public final boolean equals(Object o) {

@@ -6,9 +6,11 @@ import com.example.labb2_spring_boot.entities.Location;
 import com.example.labb2_spring_boot.exeptions.EntityNotFoundException;
 import com.example.labb2_spring_boot.interfaces.LocationRepository;
 import com.example.labb2_spring_boot.requestBodies.AddLocationReqBody;
+import com.example.labb2_spring_boot.requestBodies.LocationReqBody;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.geolatte.geom.G2D;
+import org.geolatte.geom.Geometries;
 import org.geolatte.geom.Point;
 import org.geolatte.geom.codec.Wkt;
 
@@ -74,7 +76,9 @@ public class LocationService {
 
     public Optional<LocationDto> getById(@PositiveOrZero Long id) {
         String userName = getAuthenticatedUserName();
+
         return locationRepository.getByIDOrCreatedBy(id, userName).map(LocationDto::new);
+
     }
 
     public List<LocationDto> getAllByCategory(String categoryName) {
@@ -121,4 +125,10 @@ public class LocationService {
     }
 
 
+    public List<LocationDto> getLocationsWithinMeters(Long meters, LocationReqBody fromLocation) {
+        var fromLocationG2D = Geometries.mkPoint( new G2D(fromLocation.longitude(), fromLocation.latitude()), WGS84);
+
+        return locationRepository.getLocationsWithinMetersFromLocation(meters, fromLocationG2D)
+                .stream().map(LocationDto::new).toList();
+    }
 }
