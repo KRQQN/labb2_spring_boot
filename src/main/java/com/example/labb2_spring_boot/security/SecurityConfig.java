@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "api/locations").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/locations").authenticated()
                         .requestMatchers(HttpMethod.GET, "api/locations/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/locations/within/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "api/locations/category/**").authenticated()
                         .anyRequest().denyAll())
                 .build();

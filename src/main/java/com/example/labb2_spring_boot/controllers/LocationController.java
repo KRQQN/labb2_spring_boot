@@ -5,11 +5,13 @@ import com.example.labb2_spring_boot.dataTransferObjects.LocationIdNameDto;
 import com.example.labb2_spring_boot.entities.Location;
 import com.example.labb2_spring_boot.exeptions.EntityNotFoundException;
 import com.example.labb2_spring_boot.requestBodies.AddLocationReqBody;
+import com.example.labb2_spring_boot.requestBodies.LocationReqBody;
 import com.example.labb2_spring_boot.services.LocationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.List;
 
@@ -68,6 +70,13 @@ public class LocationController {
                 .toUri();
 
         return ResponseEntity.created(uri).body(updatedLocation);
+    }
+
+    @GetMapping("within/{meters}")
+    public ResponseEntity<List<LocationDto>> getLocationsWithin(@PathVariable Long meters, @RequestBody LocationReqBody fromLocation) {
+        List<LocationDto> locations = locationService.getLocationsWithinMeters(meters, fromLocation);
+        if(locations.isEmpty()) throw new EntityNotFoundException("Location");
+        return ResponseEntity.ok().body(locations);
     }
 
 
